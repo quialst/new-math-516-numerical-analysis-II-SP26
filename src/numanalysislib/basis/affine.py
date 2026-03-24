@@ -21,7 +21,7 @@ class AffinePolynomialBasis(PolynomialBasis):
         """
         # check for endpoint ordering
         if a > b:
-            raise ValueError("a must be greater than b")
+            raise ValueError("b must be greater than a")
         
         self.basis = basis
         self.a_hat = basis.a

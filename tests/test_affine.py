@@ -53,7 +53,7 @@ def test_failure():
     a = -2
     b = -4
 
-    with pytest.raises(ValueError, match = "a must be greater than b"):
+    with pytest.raises(ValueError, match = "b must be greater than a"):
         basis = PowerBasis(10)
         Affine = AffinePolynomialBasis(basis, a = a, b = b)
 
