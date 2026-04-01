@@ -42,7 +42,7 @@ class AffinePolynomialBasis(PolynomialBasis):
         x_hat = self.pull_back(x)
         x_hat_eval = self.basis.evaluate_basis(index, x_hat)
 
-        return self.push_forward(x_hat_eval)
+        return x_hat_eval
     
     def fit(self, x_nodes: np.ndarray, y_nodes: np.ndarray) -> np.ndarray:
         """
@@ -51,7 +51,7 @@ class AffinePolynomialBasis(PolynomialBasis):
         """
         x_nodes_hat = self.pull_back(x_nodes)
         y_nodes_hat = self.pull_back(y_nodes)
-        return self.push_forward(self.basis.fit(x_nodes_hat, y_nodes_hat))
+        return self.basis.fit(x_nodes_hat, y_nodes_hat)
 
 
     def pull_back(self, x: float) -> float:
