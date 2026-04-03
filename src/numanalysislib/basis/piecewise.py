@@ -1,14 +1,26 @@
 from numanalysislib.basis._abstract import PolynomialBasis
 from numanalysislib.basis.affine import AffinePolynomialBasis
-from numanalysislib.basis.power import PowerBasis #DELETE THIS
 import numpy as np
 import warnings
-import matplotlib.pyplot as plt
 
 
-class PiecewisePolynomial:
+class PiecewisePolynomial(PolynomialBasis):
     def __init__(self, basis_type: PolynomialBasis, mesh: list):
+        """
+        Initalize PiecewisePolynomial
+
+        Args:
+            - basis_type: Polynomial basis to be used for each element
+            - mesh: list of tuples specifying element endpoints
+        """
         self.basis_type = basis_type
+
+        # inheret attributes
+        self.basis = basis_type
+        self.a_hat = basis_type.a
+        self.b_hat = basis_type.b
+        self.degree = basis_type.degree
+        self.n_dofs = basis_type.n_dofs
 
         #order mesh
         mesh.sort()
@@ -28,17 +40,26 @@ class PiecewisePolynomial:
             b = element[1]
             self.bases[element] = AffinePolynomialBasis(basis_type, a, b)
 
-    
-    def fit(self, y_mesh: list):
-        # y_mesh is list of arrays with enough pts per element for required degree
-        # dofs considered from left endpoint e.g. if intervals are (0.0, 0.5) and (0.5, 0.1) with a degree 1
-        # polynomial basis then the y_mesh could be [np.array([1]), np.array([2]), np.array([1])]
+    #overwrites output type
+    def fit(self, y_mesh: list) -> dict:
+        """
+        Override of fit method with dictionary.
 
+        Args:
+            - y_mesh: list of arrays. Each array should have enough points for the degrees of freedom of the basis_type
+        
+        Returns:
+            - bases_coeffs: dictionary with kw for each mesh element and corresponding value of the coefficients for that element
+        """
         bases_coeffs = {}
 
         last_right_endpoint = y_mesh[0][0] #initializer tracker for last encountered right endpoint
 
         for index, y_element in enumerate(y_mesh):
+            # check dofs
+            if len(y_element) != self.n_dofs:
+                raise ValueError("y_mesh must have as many points as dofs for basis_type")
+            
             # check continuity
             if y_element[0] != last_right_endpoint:
                 raise ValueError(f"y_mesh must induce continuous piecewise polynomial. Ensure endpoints are consistent")
@@ -60,8 +81,60 @@ class PiecewisePolynomial:
         
 
         return bases_coeffs
+    
+    def float_evaluate_basis(self, index: int, x: float) -> float:
+        """
+        single float x implementation for basis evaluation
 
-    def float_evaluate(self, coefficients: dict, x: float):
+        Args:
+            - index: index of basis element to evaluate
+            - x: point to evaluate at
+
+        Returns:
+            - y: value of basis element at x
+        """
+        min_index = 0
+        max_index = len(self.mesh)
+        current_index = min_index + (max_index - min_index)//2
+        for _ in range(len(self.mesh)):
+            element = self.mesh[current_index]
+            a = element[0]
+            b = element[1]
+            if x < a:
+                max_index = current_index
+            elif x > b:
+                min_index = current_index
+            else:
+                return self.bases[element].evaluate_basis(index, x) 
+            
+            current_index = min_index + (max_index - min_index)//2
+        # throw a warning if the loop finishes
+        warnings.warn("no interval found")
+    
+    def evaluate_basis(self, index: int, x: np.array) -> np.array:
+        """
+        vectorized x implementation for basis evaluation
+
+        Args:
+            - index: index of basis element to evaluate
+            - x: points to evaluate at
+
+        Returns:
+            - y: values of basis element at x
+        """
+        return np.vectorize(lambda y: self.float_evaluate_basis(index, y))(x)
+
+    def float_evaluate(self, coefficients: dict, x: float) -> float:
+        """
+        single float x implementation for evaluation
+
+        Args:
+            - coeffs: coefficients for basis functions
+            - x: point to evaluate at
+
+        Returns:
+            - y: value of basis at x
+        """
 
         min_index = 0
         max_index = len(self.mesh)
@@ -81,17 +154,16 @@ class PiecewisePolynomial:
         # throw a warning if the loop finishes
         warnings.warn("no interval found")
     
+    #overwrites output type
     def evaluate(self, coefficients: dict, x: np.array):
-        return np.vectorize(lambda y: self.float_evaluate(coefficients, y))(x)
+        """
+        vectorized x implementation for evaluation
 
-if __name__ == "__main__":
-    power = PowerBasis(1)
-    h=0.5
-    pw_poly = PiecewisePolynomial(power, [(k*h, (k+1)*h) for k in range(4)])
-    coeffs = pw_poly.fit([np.array([0.0, 0.5]), np.array([0.5, 0.0]), np.array([0.0, 1.0]), np.array([1.0, 1.25])])
-    print(coeffs)
-    left_endpts = [pw_poly.mesh[i][0] for i in range(len(pw_poly.mesh))]
-    print("mesh", pw_poly.mesh)
-    print(pw_poly.evaluate(coeffs, 1.6))
-    plt.plot(pw_poly.evaluate(coeffs, np.linspace(0,2, 100)))
-    plt.show()
+        Args:
+            - coeffs: coefficients for basis functions
+            - x: points to evaluate at
+
+        Returns:
+            - y: values of basis at x
+        """
+        return np.vectorize(lambda y: self.float_evaluate(coefficients, y))(x)
