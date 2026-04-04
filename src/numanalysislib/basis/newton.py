@@ -4,9 +4,10 @@ import numpy as np
 
 class NewtonPolynomialBasis(PolynomialBasis):
     def __init__(self, x_nodes: np.ndarray):
-        
-        # Newton polynomial basis defined by interpolation nodes.
-        
+
+        """
+        Newton polynomial basis defined by interpolation nodes.
+        """
         self.x_nodes = np.asarray(x_nodes)
         degree = len(x_nodes) - 1
 
@@ -15,8 +16,10 @@ class NewtonPolynomialBasis(PolynomialBasis):
                          b=np.max(x_nodes))
 
 
-    # Basis functions
-    # n_i(x) = Π_{j=0}^{i-1} (x - x_j)
+    """
+    Basis functions
+    n_i(x) = Π_{j=0}^{i-1} (x - x_j)
+    """
 
     def evaluate_basis(self, index: int, x: np.ndarray) -> np.ndarray:
         x = np.asarray(x)
@@ -25,14 +28,13 @@ class NewtonPolynomialBasis(PolynomialBasis):
             return np.ones_like(x, dtype=float)
 
         result = np.ones_like(x, dtype=float)
-        
         for j in range(index):
             result *= (x - self.x_nodes[j])
 
         return result
 
-
-    # Divided Differences (fit)
+ 
+    # 2. Divided Differences (fit)
 
     def fit(self, x_nodes: np.ndarray, y_nodes: np.ndarray) -> np.ndarray:
         x_nodes = np.asarray(x_nodes)
@@ -54,7 +56,7 @@ class NewtonPolynomialBasis(PolynomialBasis):
         return coef
 
 
-    # Efficient evaluation (Horner for Newton form)
+    # 3. Efficient evaluation (Horner for Newton form)
 
     def evaluate(self, coefficients: np.ndarray, x: np.ndarray) -> np.ndarray:
         if len(coefficients) != self.n_dofs:
