@@ -5,13 +5,12 @@ import warnings
 
 
 class PiecewisePolynomial(PolynomialBasis):
-    def __init__(self, basis_type: PolynomialBasis, mesh: list):
+    def __init__(self, basis_type: PolynomialBasis, mesh: np.array):
         """
-        Initalize PiecewisePolynomial
-
-        Args:
-            - basis_type: Polynomial basis to be used for each element
-            - mesh: list of tuples specifying element endpoints
+        :param basis_type: Type of Polynomial basis to use
+        :type basis_type: PolynomialBasis
+        :param mesh: Mesh points 
+        :type mesh: np.array
         """
         self.basis_type = basis_type
 
@@ -22,10 +21,9 @@ class PiecewisePolynomial(PolynomialBasis):
         self.degree = basis_type.degree
         self.n_dofs = basis_type.n_dofs
 
-        #order mesh
-        mesh.sort()
-        self.mesh = mesh
-        
+        self.mesh = []
+        for index in range(len(mesh) - 1):
+            self.mesh.append((mesh[index], mesh[index + 1]))
         #check that mesh has no overlaps
         for index in range(len(self.mesh)-1):
             element1 = self.mesh[index]
@@ -43,13 +41,12 @@ class PiecewisePolynomial(PolynomialBasis):
     #overwrites output type
     def fit(self, y_mesh: list) -> dict:
         """
-        Override of fit method with dictionary.
+        Fit each element to specific y_values
 
-        Args:
-            - y_mesh: list of arrays. Each array should have enough points for the degrees of freedom of the basis_type
-        
-        Returns:
-            - bases_coeffs: dictionary with kw for each mesh element and corresponding value of the coefficients for that element
+        :param y_mesh: list of numpy arrays. Each array contains the points to fit to. Number of points must match DOF.
+        :type y_mesh: list
+        :return: dictionary specifying the map from element -> coefficients
+        :rtype: dict
         """
         bases_coeffs = {}
 
@@ -85,13 +82,6 @@ class PiecewisePolynomial(PolynomialBasis):
     def float_evaluate_basis(self, index: int, x: float) -> float:
         """
         single float x implementation for basis evaluation
-
-        Args:
-            - index: index of basis element to evaluate
-            - x: point to evaluate at
-
-        Returns:
-            - y: value of basis element at x
         """
         min_index = 0
         max_index = len(self.mesh)
@@ -113,27 +103,19 @@ class PiecewisePolynomial(PolynomialBasis):
     
     def evaluate_basis(self, index: int, x: np.array) -> np.array:
         """
-        vectorized x implementation for basis evaluation
+        Evaluate specified basis function at specific points
 
-        Args:
-            - index: index of basis element to evaluate
-            - x: points to evaluate at
-
-        Returns:
-            - y: values of basis element at x
+        :param index: index of basis function to evaluate
+        :type index: int
+        :param x: points to evaluate at
+        :type x: np.array
+        :rtype: np.array
         """
         return np.vectorize(lambda y: self.float_evaluate_basis(index, y))(x)
 
     def float_evaluate(self, coefficients: dict, x: float) -> float:
         """
         single float x implementation for evaluation
-
-        Args:
-            - coeffs: coefficients for basis functions
-            - x: point to evaluate at
-
-        Returns:
-            - y: value of basis at x
         """
 
         min_index = 0
@@ -155,15 +137,14 @@ class PiecewisePolynomial(PolynomialBasis):
         warnings.warn("no interval found")
     
     #overwrites output type
-    def evaluate(self, coefficients: dict, x: np.array):
+    def evaluate(self, coefficients: dict, x: np.array) -> np.array:
         """
-        vectorized x implementation for evaluation
+        Evaluate polynomial with coefficients at specified points
 
-        Args:
-            - coeffs: coefficients for basis functions
-            - x: points to evaluate at
-
-        Returns:
-            - y: values of basis at x
+        :param coefficients: coefficients for each element
+        :type coefficients: dict
+        :param x: points to evaluate at
+        :type x: np.array
+        :rtype: np.array
         """
         return np.vectorize(lambda y: self.float_evaluate(coefficients, y))(x)

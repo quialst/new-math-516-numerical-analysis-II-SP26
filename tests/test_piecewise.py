@@ -12,14 +12,14 @@ class TestPiecewise():
     @pytest.fixture
     def simple_pw_poly(self):
         basis = PowerBasis(degree = 1)
-        mesh = [(0.0, 1.0)]
+        mesh = [0.0, 1.0]
         return PiecewisePolynomial(basis, mesh)
 
     @pytest.fixture
     def pw_poly(self):
         basis = PowerBasis(degree=1)
         h = 0.5
-        mesh = [(k*h, (k+1)*h) for k in range(4)]
+        mesh = [k*h for k in range(5)]
         return PiecewisePolynomial(basis, mesh)
     
     def test_evaluate_basis_exact(self, simple_pw_poly):
@@ -55,13 +55,6 @@ class TestPiecewise():
         "ensure error is thrown for too many y_vals"
         with pytest.raises(ValueError):
             pw_poly.fit([np.array([0.0, 1.0, 2.0]), np.array([2.0, 1.0]), np.array([1.0, 1.0]), np.array([1.0, 1.25])])
-
-    def test_init_error(self):
-        "ensure error is thrown for overlapping mesh"
-        basis = PowerBasis(degree=1)
-        mesh = [(0.0, 0.2), (0.1, 0.3)]
-        with pytest.raises(ValueError):
-            return PiecewisePolynomial(basis, mesh)
 
     @patch("matplotlib.pyplot.show")
     def test_plotter_plot_basis(self, mock_show, pw_poly):
