@@ -40,11 +40,11 @@ class HermiteBasis(PolynomialBasis):
 
         if index == 0:
             return 2.0 * x3 - 3.0 * x2 + 1.0
-        if index == 1:
+        elif index == 1:
             return x3 - 2.0 * x2 + x
-        if index == 2:
+        elif index == 2:
             return -2.0 * x3 + 3.0 * x2
-        if index == 3:
+        elif index == 3:
             return x3 - x2
 
     def fit(self, x_nodes: np.ndarray, y_nodes: np.ndarray, physical_interval: tuple = None) -> np.ndarray:
