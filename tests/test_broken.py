@@ -4,14 +4,10 @@ from numanalysislib.basis.broken import BrokenPolynomialBasis
 from numanalysislib.basis.power import PowerBasis
 
 
-# 1. Test basis local support
-
-def test_broken_basis_local_support():
-    
+def test_broken_basis_local_support(): 
     """
     Each basis function should be nonzero only on its element.
     """
-    
     basis_type = PowerBasis(degree=1)
     mesh = np.array([0.0, 1.0, 2.0])
     basis = BrokenPolynomialBasis(basis_type, mesh)
@@ -26,15 +22,10 @@ def test_broken_basis_local_support():
     assert vals[1] == 0
 
 
-
-# 2. Test DOF count
-
 def test_broken_dof_count():
-    
     """
     Check DOFs = N_elements * (k+1)
-    """
-    
+    """ 
     basis_type = PowerBasis(degree=2)  # 3 DOFs per element
     mesh = np.array([0.0, 1.0, 2.0, 3.0])  # 3 elements
 
@@ -44,15 +35,10 @@ def test_broken_dof_count():
     assert basis.n_dofs == expected_dofs
 
 
-
-# 3. Test L2 projection of constant function
-
-def test_broken_l2_projection_constant():
-    
+def test_broken_l2_projection_constant():  
     """
     Project f(x)=1 → should recover constant exactly.
-    """
-    
+    """   
     basis_type = PowerBasis(degree=1)
     mesh = np.array([0.0, 1.0, 2.0])
     basis = BrokenPolynomialBasis(basis_type, mesh)
@@ -67,15 +53,10 @@ def test_broken_l2_projection_constant():
     np.testing.assert_allclose(y_eval, 1.0, atol=1e-10)
 
 
-
-# 4. Test L2 projection of linear function
-
 def test_broken_l2_projection_linear():
-    
     """
     Project f(x)=x → should match exactly for degree 1 basis.
     """
-    
     basis_type = PowerBasis(degree=1)
     mesh = np.array([0.0, 1.0, 2.0])
     basis = BrokenPolynomialBasis(basis_type, mesh)
@@ -90,15 +71,10 @@ def test_broken_l2_projection_linear():
     np.testing.assert_allclose(y_eval, x_test, atol=1e-10)
 
 
-
-# 5. Test discontinuity allowed
-
-def test_broken_discontinuity():
-    
+def test_broken_discontinuity(): 
     """
     DG allows discontinuities across element boundaries.
-    """
-    
+    """ 
     basis_type = PowerBasis(degree=1)
     mesh = np.array([0.0, 1.0, 2.0])
     basis = BrokenPolynomialBasis(basis_type, mesh)
@@ -118,15 +94,10 @@ def test_broken_discontinuity():
     assert y_left != y_right
 
 
-
-# 6. Test coefficient structure
-
 def test_broken_coeff_structure():
-    
     """
     fit() should return dict with coefficients per element.
     """
-    
     basis_type = PowerBasis(degree=1)
     mesh = np.array([0.0, 1.0, 2.0])
     basis = BrokenPolynomialBasis(basis_type, mesh)
@@ -143,15 +114,10 @@ def test_broken_coeff_structure():
         assert len(coeffs[element]) == basis_type.n_dofs
 
 
-
-# 7. Test vector evaluation
-
 def test_broken_evaluate_vector():
-    
     """
     Ensure vectorized evaluation works correctly.
-    """
-    
+    """ 
     basis_type = PowerBasis(degree=1)
     mesh = np.array([0.0, 1.0, 2.0])
     basis = BrokenPolynomialBasis(basis_type, mesh)
