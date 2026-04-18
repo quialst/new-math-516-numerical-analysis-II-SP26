@@ -103,7 +103,7 @@ def evaluate_derivative(basis: PolynomialBasis, coefficients: np.ndarray, x: flo
         case "backward":
             s = np.arange(-k, 1)
         case _:
-            raise ValueError(f"Unknown scheme: {scheme}. " f"Use 'centered', 'forward', or 'backward'.")
+            raise ValueError(f"Unknown scheme: {scheme}. Use 'centered', 'forward', or 'backward'.")
         
     n = len(s)
 

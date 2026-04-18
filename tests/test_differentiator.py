@@ -8,7 +8,7 @@ from numanalysislib.basis.chebyshev import ChebyshevBasis
 class TestDifferentiate:
 
     def test_constant(self):
-        """ Test if derivative of a constant is zero."""
+        """Test if derivative of a constant is zero."""
         basis = PowerBasis(0)
         coeffs = np.array([2.0])
         new_basis, new_coeffs = differentiate(basis, coeffs)
