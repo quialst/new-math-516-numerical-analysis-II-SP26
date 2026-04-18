@@ -32,11 +32,21 @@ class NewtonPolynomialBasis(PolynomialBasis):
             result *= (x - self.x_nodes[j])
 
         return result
-
- 
-    # 2. Divided Differences (fit)
-
+   
     def fit(self, x_nodes: np.ndarray, y_nodes: np.ndarray) -> np.ndarray:
+        """
+        Parameters
+        ----------
+        x_nodes : np.ndarray
+            Interpolation nodes (must match basis dimension).
+        y_nodes : np.ndarray
+            Function values at the nodes.
+
+        Returns
+        -------
+        np.ndarray
+            Array of Newton coefficients [c_0, ..., c_{n-1}].
+        """
         x_nodes = np.asarray(x_nodes)
         y_nodes = np.asarray(y_nodes)
 
@@ -55,10 +65,25 @@ class NewtonPolynomialBasis(PolynomialBasis):
 
         return coef
 
-
-    # 3. Efficient evaluation (Horner for Newton form)
-
     def evaluate(self, coefficients: np.ndarray, x: np.ndarray) -> np.ndarray:
+        """
+        polynomial in nested form:
+
+            P(x) = (...((c_{n-1}(x - x_{n-2}) + c_{n-2})
+                        (x - x_{n-3}) + c_{n-3}) ... ) + c_0
+
+        Parameters
+        ----------
+        coefficients : np.ndarray
+            Newton coefficients [c_0, ..., c_{n-1}].
+        x : np.ndarray
+            Points at which to evaluate the polynomial.
+
+        Returns
+        -------
+        np.ndarray
+            Values of the interpolating polynomial at x.
+        """
         if len(coefficients) != self.n_dofs:
             raise ValueError(
                 f"Expected {self.n_dofs} coefficients, got {len(coefficients)}"
@@ -66,7 +91,6 @@ class NewtonPolynomialBasis(PolynomialBasis):
 
         x = np.asarray(x, dtype=float)
 
-        # Horner scheme for Newton form
         result = np.zeros_like(x) + coefficients[-1]
 
         for k in range(self.n_dofs - 2, -1, -1):
