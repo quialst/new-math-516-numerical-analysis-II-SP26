@@ -3,15 +3,10 @@ import numpy as np
 from numanalysislib.basis.newton import NewtonPolynomialBasis
 
 
-
-# 1. Test basis functions
-
-def test_newton_basis_functions():
-    
+def test_newton_basis_functions():  
     """
     Check that n_i(x) = Π_{j=0}^{i-1} (x - x_j)
-    """
-    
+    """  
     x_nodes = np.array([0.0, 1.0, 2.0])
     basis = NewtonPolynomialBasis(x_nodes)
 
@@ -27,42 +22,30 @@ def test_newton_basis_functions():
     assert np.allclose(basis.evaluate_basis(2, x), 6.0)
 
 
-
-# 2. Test divided differences (fit)
-
-def test_newton_fit_simple_polynomial():
-    
+def test_newton_fit_simple_polynomial(): 
     """
     Fit p(x) = x^2 and verify coefficients are correct.
     """
-    
     x_nodes = np.array([0.0, 1.0, 2.0])
     y_nodes = x_nodes**2  # [0, 1, 4]
 
     basis = NewtonPolynomialBasis(x_nodes)
     coeffs = basis.fit(x_nodes, y_nodes)
-
     """
     Expected Newton coefficients:
     c0 = 0
     c1 = 1
     c2 = 1
-    
     """
     expected = np.array([0.0, 1.0, 1.0])
 
     np.testing.assert_allclose(coeffs, expected, rtol=1e-14)
 
 
-
-# 3. Test interpolation property
-
-def test_newton_interpolation_property():
-    
+def test_newton_interpolation_property():  
     """
     The fitted polynomial must satisfy p(x_i) = y_i
-    """
-    
+    """  
     x_nodes = np.array([0.0, 1.0, 2.0, 3.0])
     y_nodes = np.sin(x_nodes)
 
@@ -74,15 +57,10 @@ def test_newton_interpolation_property():
     np.testing.assert_allclose(y_eval, y_nodes, rtol=1e-12)
 
 
-
-# 4. Test Horner evaluation (vector input)
-
 def test_newton_evaluate_vector():
-    
     """
     Check evaluation on multiple points.
-    """
-    
+    """  
     x_nodes = np.array([0.0, 1.0, 2.0])
     y_nodes = x_nodes**2
 
@@ -97,9 +75,6 @@ def test_newton_evaluate_vector():
     np.testing.assert_allclose(y_eval, y_expected, rtol=1e-12)
 
 
-
-# 5. Test coefficient size mismatch
-
 def test_newton_coefficient_shape_mismatch():
     basis = NewtonPolynomialBasis(np.array([0.0, 1.0, 2.0]))
 
@@ -110,9 +85,6 @@ def test_newton_coefficient_shape_mismatch():
         basis.evaluate(wrong_coeffs, x)
 
 
-
-# 6. Test node size mismatch in fit
-
 def test_newton_fit_node_mismatch():
     basis = NewtonPolynomialBasis(np.array([0.0, 1.0, 2.0]))
 
@@ -121,10 +93,6 @@ def test_newton_fit_node_mismatch():
 
     with pytest.raises(ValueError):
         basis.fit(x_nodes, y_nodes)
-
-
-
-# 7. Test exact match
 
 
 def test_newton_matches_polynomial_exactly():
