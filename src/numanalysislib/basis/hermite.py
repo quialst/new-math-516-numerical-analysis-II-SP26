@@ -1,7 +1,7 @@
 """
 Hermite cubic polynomial basis functions.
 
-p(x) = v_a * h_0(x) + d_a * h_1(x) * (b-a) + v_b * h_2(x) + d_b * h_3(x) * (b-a)
+Fit a cubic polynomial using the values and derivatives at the endpoints of a given interval.
 """
 
 import numpy as np
@@ -10,6 +10,14 @@ from numanalysislib.basis._abstract import PolynomialBasis
 
 
 class HermiteBasis(PolynomialBasis):
+    """
+    Hermite cubic polynomial basis functions.
+
+    p(x) = v_a * h_0(x) + d_a * h_1(x) * (b-a) + v_b * h_2(x) + d_b * h_3(x) * (b-a)
+    """
+
+    # Signal that this basis needs the physical interval for correct scaling
+    requires_physical_interval = True
 
     def __init__(self):
         super().__init__(degree=3, a=0.0, b=1.0)
@@ -38,16 +46,19 @@ class HermiteBasis(PolynomialBasis):
         x2 = x * x
         x3 = x2 * x
 
-        if index == 0:
-            return 2.0 * x3 - 3.0 * x2 + 1.0
-        elif index == 1:
-            return x3 - 2.0 * x2 + x
-        elif index == 2:
-            return -2.0 * x3 + 3.0 * x2
-        elif index == 3:
-            return x3 - x2
+        match index:
+            case 0:
+                return 2.0 * x3 - 3.0 * x2 + 1.0
+            case 1:
+                return x3 - 2.0 * x2 + x
+            case 2:
+                return -2.0 * x3 + 3.0 * x2
+            case 3:
+                return x3 - x2
+            case _:
+                raise ValueError(f"Invalid index: {index}")
 
-    def fit(self, x_nodes: np.ndarray, y_nodes: np.ndarray, physical_interval: tuple = None) -> np.ndarray:
+    def fit(self, x_nodes: np.ndarray, y_nodes: np.ndarray) -> np.ndarray:
         """
         Compute coefficients from endpoint data [v_a, d_a, v_b, d_b].
 
@@ -55,7 +66,6 @@ class HermiteBasis(PolynomialBasis):
         ----------
         x_nodes: [a, b] defining the interval.
         y_nodes: [v_a, d_a, v_b, d_b], where v_a and v_b are values at two endpoints, d_a and d_b are the derivatives.
-        physical_interval: Optional tuple (a, b) to specify the physical interval for scaling derivative coefficients.
         
         Returns
         -------
@@ -70,12 +80,7 @@ class HermiteBasis(PolynomialBasis):
             raise ValueError(f"HermiteBasis.fit expects {self.n_dofs} data entries [v_a, d_a, v_b, d_b].")
 
         # Determine scaling for derivative coefficients. 
-        # If a physical interval is provided (from an Affine wrapper), use that; otherwise infer from x_nodes.
-        if physical_interval is not None:
-            a, b = physical_interval
-        else:
-            a, b = x_nodes
-
+        a, b = x_nodes
         scale = b - a
         if scale <= 0.0:
             raise ValueError("Interval endpoints must satisfy b > a.")
