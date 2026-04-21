@@ -15,6 +15,18 @@ class BrokenPolynomialBasis(PolynomialBasis):
         """
         self.basis_type = basis_type
 
+        # Sanity check for the mesh
+        mesh = np.asarray(mesh, dtype=float)
+
+        if mesh.ndim != 1:
+            raise ValueError("Mesh must be a 1D array.")
+
+        if len(mesh) < 2:
+            raise ValueError("Mesh must contain at least two points.")
+
+        if not np.all(np.diff(mesh) > 0):
+            raise ValueError("Mesh points must be strictly increasing (no duplicates or reversed elements).")
+
         # Build mesh as list of intervals
         # xmpl: [0,1,2] → [(0,1), (1,2)]
         self.mesh = [(mesh[i], mesh[i+1]) for i in range(len(mesh)-1)]
@@ -46,6 +58,10 @@ class BrokenPolynomialBasis(PolynomialBasis):
 
         Global index → (element, local index)
         """
+
+        if not (0 <= index < self.n_dofs):
+            raise ValueError(f"Index must be in [0, {self.n_dofs - 1}], got {index}")
+
         x = np.asarray(x)
 
         element_id = index // self.local_dofs
@@ -86,12 +102,9 @@ class BrokenPolynomialBasis(PolynomialBasis):
             wq = 0.5*(b - a)*wi
 
             # Build mass matrix M_ij = ∫ φ_i φ_j
-            M = np.zeros((n, n))
-            for i in range(n):
-                phi_i = basis.evaluate_basis(i, xq)
-                for j in range(n):
-                    phi_j = basis.evaluate_basis(j, xq)
-                    M[i, j] = np.sum(wq * phi_i * phi_j)
+            phi = np.array([basis.evaluate_basis(i, xq) for i in range(n)])
+            Wphi = phi * wq  
+            M = phi @ Wphi.T
 
             # RHS: b_i = ∫ f φ_i
             b_vec = np.zeros(n)
@@ -118,9 +131,10 @@ class BrokenPolynomialBasis(PolynomialBasis):
 
         return 0.0  # outside domain
 
+
     def evaluate(self, coefficients: dict, x: np.ndarray) -> np.ndarray:
         """
         Vectorized evaluation
         """
         x = np.asarray(x)
-        return np.vectorize(lambda xi: self.float_evaluate(coefficients, xi))(x)
+        return np.array([self.float_evaluate(coefficients, xi) for xi in x])
