@@ -36,6 +36,7 @@ def test_newton_fit_simple_polynomial():
     c0 = 0
     c1 = 1
     c2 = 1
+    
     """
     expected = np.array([0.0, 1.0, 1.0])
 
@@ -111,3 +112,32 @@ def test_newton_matches_polynomial_exactly():
     y_eval = basis.evaluate(coeffs, x_test)
 
     np.testing.assert_allclose(y_eval, y_expected, rtol=1e-12)
+
+
+def test_repeated_nodes():
+
+    x_nodes = np.array([0.0, 1.0, 1.0, 2.0])
+    y_nodes = np.array([1.0, 2.0, 3.0, 4.0])
+
+    with pytest.raises(ValueError):
+        NewtonPolynomialBasis(x_nodes).fit(x_nodes, y_nodes)
+
+
+def test_evaluate_basis_negative_index():
+
+    x_nodes = np.array([0.0, 1.0, 2.0])
+    basis = NewtonPolynomialBasis(x_nodes)
+
+    x = np.array([0.5, 1.5])
+
+    with pytest.raises(ValueError):
+        basis.evaluate_basis(-1, x)
+
+
+def test_x_y_lenght_mismatch():
+    x_nodes = np.array([0.0, 1.0, 2.0])
+    y_nodes = np.array([1.0, 2.0, 3.0, 4.0])
+
+    with pytest.raises(ValueError):
+        NewtonPolynomialBasis(x_nodes).fit(x_nodes, y_nodes)
+
