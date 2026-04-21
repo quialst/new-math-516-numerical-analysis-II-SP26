@@ -16,13 +16,28 @@ class NewtonPolynomialBasis(PolynomialBasis):
                          b=np.max(x_nodes))
 
 
-    """
-    Basis functions
-    n_i(x) = Π_{j=0}^{i-1} (x - x_j)
-    """
-
     def evaluate_basis(self, index: int, x: np.ndarray) -> np.ndarray:
+        """
+        Basis functions
+        n_i(x) = Π_{j=0}^{i-1} (x - x_j)
+
+        Parameters
+        ----------
+        index : int
+            Index i of the basis function n_i(x).
+        x : np.ndarray
+            Points at which to evaluate the basis function.
+
+        Returns
+        -------
+        np.ndarray
+            Values of the i-th basis function evaluated at x.
+        """
+
         x = np.asarray(x)
+
+        if index<0:
+            raise ValueError("Index must be non-negative")
 
         if index == 0:
             return np.ones_like(x, dtype=float)
@@ -52,6 +67,12 @@ class NewtonPolynomialBasis(PolynomialBasis):
 
         if len(x_nodes) != self.n_dofs:
             raise ValueError("Number of nodes must match basis dimension")
+        
+        if len(np.unique(x_nodes)) != len(x_nodes):
+            raise ValueError("x_nodes must be distinct (no repeated nodes allowed).")
+        
+        if len(x_nodes) != len(y_nodes):
+            raise ValueError("x_nodes and y_nodes must have the same lenght")
 
         coef = y_nodes.astype(float).copy()
         n = len(coef)
