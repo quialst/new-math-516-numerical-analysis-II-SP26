@@ -3,6 +3,13 @@ from numanalysislib.basis._abstract import PolynomialBasis
 
 class TensorProductBasis(PolynomialBasis):
     def __init__(self, bx: PolynomialBasis, by: PolynomialBasis):
+        """
+        Initialize a 2D tensor product basis from two 1D basis functions.
+
+            Args:
+                bx: A 1D polynomial basis function for the x-dimension.
+                by: A 1D polynomial basis function for the y-dimension.
+        """
         self.bx = bx
         self.by = by
         self.nx = bx.n_dofs
@@ -12,7 +19,16 @@ class TensorProductBasis(PolynomialBasis):
         super().__init__(total_dofs - 1, bx.a, by.a)
 
     def _unflatten_index(self, index: int):
-        """Helper function to loop through vectors"""
+        """
+        Convert a flat index to a 2D (i, j) index for the tensor product basis.
+
+            Args:
+                index: The flat index in the range [0, n_dofs).
+
+            Returns:
+                A tuple (i, j) representing the 2D indices where i is the x-component 
+                index and j is the y-component index.
+        """
         return divmod(index, self.ny)
 
     def evaluate_basis(self, index: int, x: np.ndarray, y: np.ndarray) -> np.ndarray:
