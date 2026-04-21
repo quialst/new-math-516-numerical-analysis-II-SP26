@@ -131,3 +131,57 @@ def test_broken_evaluate_vector():
     y_eval = basis.evaluate(coeffs, x_test)
 
     np.testing.assert_allclose(y_eval, y_expected, atol=1e-10)
+
+
+def test_broken_mesh_with_repeated_points():
+    basis_type = PowerBasis(degree=1)
+
+    mesh = np.array([0.0, 1.0, 1.0, 2.0])
+
+    with pytest.raises(ValueError):
+        BrokenPolynomialBasis(basis_type, mesh)
+
+def test_broken_mesh_not_sorted():
+    basis_type = PowerBasis(degree=1)
+
+    mesh = np.array([0.0, 2.0, 1.0])
+
+    with pytest.raises(ValueError):
+        BrokenPolynomialBasis(basis_type, mesh)
+
+
+def test_broken_mesh_too_short():
+    basis_type = PowerBasis(degree=1)
+
+    mesh = np.array([1.0])
+
+    with pytest.raises(ValueError):
+        BrokenPolynomialBasis(basis_type, mesh)
+
+
+def test_broken_basis_negative_index():
+
+    mesh = np.array([0.0, 1.0, 2.0])
+
+    basis_type = PowerBasis(degree=2)
+    basis = BrokenPolynomialBasis(basis_type, mesh)
+
+    x = np.array([0.5, 1.5])
+
+    with pytest.raises(ValueError):
+        basis.evaluate_basis(-1, x)
+
+
+def test_broken_basis_index_too_large():
+
+    mesh = np.array([0.0, 1.0, 2.0])
+
+    basis_type = PowerBasis(degree=2)
+    basis = BrokenPolynomialBasis(basis_type, mesh)
+
+    x = np.array([0.5, 1.5])
+
+    with pytest.raises(ValueError):
+        basis.evaluate_basis(basis.n_dofs, x)
+
+
