@@ -4,6 +4,7 @@ Module's docstring to add
 import warnings
 import numpy as np
 from numanalysislib.basis._abstract import PolynomialBasis
+from typing import Tuple
 
 class PowerBasis(PolynomialBasis):
     """
@@ -83,3 +84,27 @@ class PowerBasis(PolynomialBasis):
             result = (result * x) + coefficients[i]
             
         return result
+
+    def differentiate_coefficients(self, coefficients: np.ndarray) -> Tuple['PowerBasis', np.ndarray]:
+        """
+        Computes the derivative coefficients in the power basis.
+
+        Parameters
+        ----------
+        coefficients: np.ndarray
+            Array of shape (n_dofs,) containing the basis coefficients.
+
+        Returns
+        -------
+        Tuple[PowerBasis, np.ndarray]
+            A new PowerBasis of degree n-1 and its coefficients representing the derivative polynomial.
+        """
+        if len(coefficients) != self.n_dofs:
+            raise ValueError(f"Expected {self.n_dofs} coefficients.")
+        
+        if self.degree == 0:
+            return PowerBasis(0), np.array([0.0])
+        
+        indices = np.arange(1, len(coefficients))
+        new_coeffs = indices * coefficients[1:]
+        return PowerBasis(self.degree - 1), new_coeffs

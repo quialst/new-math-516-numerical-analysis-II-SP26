@@ -54,6 +54,11 @@ class AffinePolynomialBasis(PolynomialBasis):
             np.ndarray: coefficients for fit basis
         """
         x_nodes_hat = self.pull_back(x_nodes)
+
+        # If the wrapped basis requires a physical interval, pass it through  `x_nodes` argument (so Hermite can interpret it as [a,b]).
+        if getattr(self.basis, "requires_physical_interval", False):
+            return self.basis.fit((self.a, self.b), y_nodes)
+
         return self.basis.fit(x_nodes_hat, y_nodes)
 
 
