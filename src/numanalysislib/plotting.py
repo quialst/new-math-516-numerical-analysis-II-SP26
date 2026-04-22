@@ -80,9 +80,6 @@ class Plotter:
             domain_x: Tuple (ax, bx) specifying the x-domain.
             domain_y: Tuple (ay, by) specifying the y-domain.
             title: Optional overall title for the figure.
-        
-        Raises:
-            TypeError: If basis is not a TensorProductBasis instance.
         """
         if not isinstance(basis, TensorProductBasis):
             raise TypeError(f"Expected TensorProductBasis, got {type(basis).__name__}")
@@ -91,10 +88,8 @@ class Plotter:
         nx = basis.nx
         ny = basis.ny
         
-        # Compute subplot grid layout: ceil(sqrt(n_dofs)) rows and columns
         grid_size = int(np.ceil(np.sqrt(n_dofs)))
         
-        # Create dense grid for evaluation
         x_dense = np.linspace(domain_x[0], domain_x[1], 35)
         y_dense = np.linspace(domain_y[0], domain_y[1], 35)
         X, Y = np.meshgrid(x_dense, y_dense)
@@ -104,10 +99,8 @@ class Plotter:
         for flat_idx in range(n_dofs):
             ax = fig.add_subplot(grid_size, grid_size, flat_idx + 1, projection='3d')
             
-            # Evaluate basis function
             Z = basis.evaluate_basis(flat_idx, x_dense, y_dense)
             
-            # Plot wireframe surface
             ax.plot_surface(X, Y, Z, cmap=cm.viridis, alpha=0.8, edgecolor='none')
             
             # Set labels and title
@@ -142,10 +135,6 @@ class Plotter:
             domain_y: Tuple (ay, by) specifying the y-domain for plotting.
             true_func: Optional callable(x, y) → z for comparison overlay.
             title: Optional title for the figure.
-        
-        Raises:
-            TypeError: If basis is not a TensorProductBasis instance.
-            ValueError: If coefficients shape doesn't match (nx, ny).
         """
         if not isinstance(basis, TensorProductBasis):
             raise TypeError(f"Expected TensorProductBasis, got {type(basis).__name__}")
@@ -153,26 +142,20 @@ class Plotter:
         if coefficients.shape != (basis.nx, basis.ny):
             raise ValueError(f"Coefficients shape {coefficients.shape} must match (nx={basis.nx}, ny={basis.ny})")
         
-        # Determine number of subplots
         n_subplots = 2 if true_func is not None else 1
         
-        # Create dense grid for evaluation
         x_dense = np.linspace(domain_x[0], domain_x[1], 40)
         y_dense = np.linspace(domain_y[0], domain_y[1], 40)
         X, Y = np.meshgrid(x_dense, y_dense)
         
-        # Evaluate fitted surface
         Z_fit = basis.evaluate(coefficients, x_dense, y_dense)
         
         fig = plt.figure(figsize=(14, 6) if n_subplots == 2 else (7, 6))
         
-        # Plot fitted surface (left or only subplot)
         ax1 = fig.add_subplot(1, n_subplots, 1, projection='3d')
         ax1.plot_surface(X, Y, Z_fit, cmap=cm.viridis, alpha=0.8, edgecolor='none')
         
-        # Overlay scatter points of fitting nodes
         Z_nodes = basis.evaluate(coefficients, x_nodes, y_nodes)
-        # Extract diagonal values that correspond to the node grid
         X_nodes, Y_nodes = np.meshgrid(x_nodes, y_nodes)
         ax1.scatter(X_nodes, Y_nodes, Z_nodes, color='red', s=50, marker='o', 
                    edgecolors='black', linewidth=1, label='Fitting Nodes', zorder=5)
@@ -183,7 +166,6 @@ class Plotter:
         ax1.set_title('Fitted Surface', fontsize=12)
         ax1.legend(fontsize=9)
         
-        # Plot true function if provided
         if true_func is not None:
             ax2 = fig.add_subplot(1, 2, 2, projection='3d')
             Z_true = true_func(X, Y)
