@@ -14,7 +14,7 @@ class Plotter:
     A generic visualization tool for PolynomialBasis subclasses.
     TODO: improve docs, consider passing the PolynomialBasis to the constructor
     """
-    def plot_basis(self, basis: PolynomialBasis, domain: Tuple[float, float] = (0, 1),
+    def plot_basis(basis: PolynomialBasis, domain: Tuple[float, float] = (0, 1),
                    title: str = None):
         """
         Plots all basis functions phi_i(x) over the given domain.
@@ -37,7 +37,7 @@ class Plotter:
         plt.tight_layout()
         plt.show()
 
-    def plot_fit(self, basis: PolynomialBasis, coefficients: np.ndarray, 
+    def plot_fit(basis: PolynomialBasis, coefficients: np.ndarray, 
                  x_nodes: np.ndarray, y_nodes: np.ndarray, 
                  domain: Tuple[float, float], 
                  true_func: Optional[Callable[[np.ndarray], np.ndarray]] = None):
@@ -68,7 +68,7 @@ class Plotter:
         plt.legend()
         plt.show()
 
-    def plot_basis_tensor(self, basis: TensorProductBasis, 
+    def plot_basis_tensor(basis: TensorProductBasis, 
                           domain_x: Tuple[float, float], 
                           domain_y: Tuple[float, float],
                           title: str = None):
@@ -115,7 +115,7 @@ class Plotter:
         plt.tight_layout()
         plt.show()
 
-    def plot_fit_tensor(self, basis: TensorProductBasis, 
+    def plot_fit_tensor(basis: TensorProductBasis, 
                         coefficients: np.ndarray,
                         x_nodes: np.ndarray, 
                         y_nodes: np.ndarray,
